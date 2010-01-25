@@ -936,37 +936,95 @@ lookup_method (OOP sendSelector,
   return (false);
 }
 
+#define ENABLE_MOP
+
 mst_Boolean
-_gst_find_method (OOP receiverClass,
+_gst_find_method_builtin (OOP receiverClass,
 	          OOP sendSelector,
 	          method_cache_entry *methodData)
 {
   OOP method_class = receiverClass;
-  for (; !IS_NIL (method_class);
-       method_class = SUPERCLASS (method_class))
+  for (; !IS_NIL (method_class); method_class = SUPERCLASS (method_class))
     {
-      OOP methodOOP =
-	_gst_find_class_method (method_class, sendSelector);
+      OOP methodOOP = _gst_find_class_method(method_class, sendSelector);
       if (!IS_NIL (methodOOP))
-	{
-	  methodData->startingClassOOP = receiverClass;
-	  methodData->selectorOOP = sendSelector;
-	  methodData->methodOOP = methodOOP;
-	  methodData->methodClassOOP = method_class;
-	  methodData->methodHeader = GET_METHOD_HEADER (methodOOP);
+        {
+          methodData->startingClassOOP = receiverClass;
+          methodData->selectorOOP = sendSelector;
+          methodData->methodOOP = methodOOP;
+          methodData->methodClassOOP = method_class;
+          methodData->methodHeader = GET_METHOD_HEADER (methodOOP);
 
 #ifdef ENABLE_JIT_TRANSLATION
-	  /* Force the translation to be looked up the next time
-	     this entry is used for a message send.  */
-	  methodData->receiverClass = NULL;
+          /* Force the translation to be looked up the next time
+           this entry is used for a message send.  */
+          methodData->receiverClass = NULL;
 #endif
-	  _gst_cache_misses++;
-	  return (true);
-	}
+          _gst_cache_misses++;
+          return (true);
+        }
     }
 
   return (false);
 }
+
+OOP
+_gst_find_lookup(OOP receiverClass) {
+  OOP searchClass = receiverClass;
+  while (!IS_NIL(searchClass)) {
+    OOP lookup = ((gst_class)(OOP_TO_OBJ(receiverClass)))->lookup;
+    if (!IS_NIL(lookup)) {
+      return lookup;
+    }
+    searchClass = SUPERCLASS (searchClass);
+  }
+  return _gst_nil_oop;
+}
+
+mst_Boolean
+_gst_find_method (OOP receiverClass,
+                  OOP sendSelector,
+                  method_cache_entry *methodData)
+{
+#ifdef ENABLE_MOP
+  OOP lookup;
+  OOP method;
+  OOP lookupArgs[2];
+  lookup = _gst_find_lookup(receiverClass);
+  if (IS_NIL(lookup)) {
+    return _gst_find_method_builtin(receiverClass, sendSelector, methodData);
+  }
+
+  //printf("VM: Non-nil lookup object, dispatching #lookup:in:\n");
+  lookupArgs[0] = sendSelector;
+  lookupArgs[1] = receiverClass;
+  method = _gst_nvmsg_send (lookup, _gst_lookup_in_symbol, lookupArgs, 2);
+  //printf("VM: lookup:in: returned\n");
+  if (!IS_NIL(method))
+  {
+    methodData->startingClassOOP = receiverClass;
+    methodData->selectorOOP = sendSelector;
+    methodData->methodOOP = method;
+    /* Sorry, we don't know method's class here :-( */
+    methodData->methodClassOOP = _gst_nil_oop;
+    methodData->methodHeader = GET_METHOD_HEADER (method);
+
+#ifdef ENABLE_JIT_TRANSLATION
+    /* Force the translation to be looked up the next time
+     this entry is used for a message send.  */
+    methodData->receiverClass = NULL;
+#endif
+    _gst_cache_misses++;
+    return (true);
+  }
+  return (false);
+#else
+  return _gst_find_method_builtin(receiverClass, sendSelector, methodData);
+#endif
+}
+
+
+
 
 OOP
 create_args_array (int numArgs)

@@ -136,7 +136,8 @@ typedef struct gst_identity_dictionary
   OOP		methodDictionary; \
   intptr_t	instanceSpec; \
   OOP		subClasses; \
-  OOP		instanceVariables
+  OOP		instanceVariables; \
+  OOP		lookup
 
 typedef struct gst_behavior
 {

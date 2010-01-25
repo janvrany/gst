@@ -280,6 +280,9 @@ static const char standard_files[] = {
   "URL.st\0"
   "FileStream.st\0"
 
+  /* Metaobject protocol */
+  "Lookup.st\0"
+
   /* Goodies */
   "Autoload.st\0"
   "DLD.st\0"

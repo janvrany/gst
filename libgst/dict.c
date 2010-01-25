@@ -644,9 +644,9 @@ static const class_definition class_info[] = {
   /* Change this, classDescription, or gst_class, and you must change
      the implementaion of new_metaclass some */
   {&_gst_behavior_class, &_gst_object_class,
-   GST_ISP_FIXED, true, 5,
+   GST_ISP_FIXED, true, 6,
    "Behavior",
-   "superClass methodDictionary instanceSpec subClasses instanceVariables",
+   "superClass methodDictionary instanceSpec subClasses instanceVariables lookup",
    NULL, NULL },
 
   {&_gst_class_description_class, &_gst_behavior_class,
@@ -938,7 +938,7 @@ init_metaclass (OOP metaclassOOP)
   metaclass->instanceVariables =
     _gst_make_instance_variable_array (_gst_nil_oop,
 				       "superClass methodDictionary instanceSpec subClasses "
-				       "instanceVariables name comment category environment "
+				       "instanceVariables lookup name comment category environment "
 				       "classVariables sharedPools securityPolicy "
 				       "pragmaHandlers");
 
@@ -948,6 +948,7 @@ init_metaclass (OOP metaclassOOP)
       sizeof (OOP)) << ISP_NUMFIXEDFIELDS);
 
   metaclass->methodDictionary = _gst_nil_oop;
+  metaclass->lookup = _gst_nil_oop;
 }
 
 void
@@ -970,7 +971,8 @@ init_class (OOP class_oop, const class_definition *ci)
 
   class->sharedPools = _gst_make_pool_array (ci->sharedPoolNames);
 
-  /* Other fields are set by the Smalltalk code.  */
+  /* Other fields are set by the Smalltalk code.  */	
+  class->lookup = _gst_nil_oop;
   class->methodDictionary = _gst_nil_oop;
   class->comment = _gst_nil_oop;
   class->category = _gst_nil_oop;
