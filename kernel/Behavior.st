@@ -33,7 +33,7 @@
 
 
 Object subclass: Behavior [
-    | superClass methodDictionary instanceSpec subClasses instanceVariables |
+    | superClass methodDictionary instanceSpec subClasses instanceVariables lookup |
     
     <category: 'Language-Implementation'>
     <comment: 'I am the parent class of all "class" type methods.  My instances know
@@ -520,6 +520,19 @@ method dictionary, and iterating over the class hierarchy.'>
 	^self evaluate: code
 	    ifError: [:fname :lineNo :errorString | requestor error: 'line ' , lineNo printString , ': ' , errorString]
     ]
+    
+    
+    lookup [
+    	<category: 'meta-object protocol'>
+    	^lookup
+    ]
+    
+    lookup: aLookup [
+    	<category: 'meta-object protocol'>    	
+    	lookup := aLookup.
+    	self flushCache.
+    ]
+    
 
     superclass: aClass [
 	"Set the receiver's superclass."

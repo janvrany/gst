@@ -134,6 +134,14 @@ typedef struct gst_object_memory
       allocFailures, allocMatches, allocSplits, allocProbes;
 } *gst_object_memory;
 
+typedef struct gst_array
+{
+  OBJ_HEADER;
+  OOP elements[];
+} *gst_array;
+
+
+
 typedef unsigned long inc_ptr;
 
 /* Garbage collector data structures */
