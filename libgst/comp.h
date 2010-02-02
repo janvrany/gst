@@ -148,6 +148,7 @@ typedef struct gst_method_info
   OOP category;
   OOP class;
   OOP selector;
+  OOP binder;
   OOP attributes[1];
 }
  *gst_method_info;

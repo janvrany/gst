@@ -497,6 +497,8 @@ extern OOP _gst_nil_oop
 #define IS_NIL(oop) \
   ((OOP)(oop) == _gst_nil_oop)
 
+#define IS_ARRAY(oop) \
+  IS_CLASS(oop, _gst_array_class)
 
 /* This macro should only be used right after an alloc_oop, when the
    emptyBytes field is guaranteed to be zero.

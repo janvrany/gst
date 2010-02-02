@@ -936,7 +936,6 @@ lookup_method (OOP sendSelector,
   return (false);
 }
 
-#define ENABLE_MOP
 
 mst_Boolean
 _gst_find_method_builtin (OOP receiverClass,
@@ -972,7 +971,7 @@ OOP
 _gst_find_lookup(OOP receiverClass) {
   OOP searchClass = receiverClass;
   while (!IS_NIL(searchClass)) {
-    OOP lookup = ((gst_class)(OOP_TO_OBJ(receiverClass)))->lookup;
+    OOP lookup = ((gst_class)(OOP_TO_OBJ(searchClass)))->lookup;
     if (!IS_NIL(lookup)) {
       return lookup;
     }
@@ -986,28 +985,31 @@ _gst_find_method (OOP receiverClass,
                   OOP sendSelector,
                   method_cache_entry *methodData)
 {
-#ifdef ENABLE_MOP
   OOP lookup;
+  OOP methods;
   OOP method;
-  OOP lookupArgs[2];
+  OOP lookupArgs[3];
   lookup = _gst_find_lookup(receiverClass);
   if (IS_NIL(lookup)) {
     return _gst_find_method_builtin(receiverClass, sendSelector, methodData);
   }
 
-  //printf("VM: Non-nil lookup object, dispatching #lookup:in:\n");
+  printf("VM: Non-nil lookup object, dispatching #lookup:senderClass:receiverClass:\n");
   lookupArgs[0] = sendSelector;
   lookupArgs[1] = receiverClass;
-  method = _gst_nvmsg_send (lookup, _gst_lookup_in_symbol, lookupArgs, 2);
-  //printf("VM: lookup:in: returned\n");
-  if (!IS_NIL(method))
+  lookupArgs[2] = OOP_INT_CLASS(_gst_self);
+  methods = _gst_nvmsg_send (lookup, _gst_lookup_in_sender_symbol, lookupArgs, 3);
+  //printf("VM: #lookup:senderClass:receiverClass:\n");
+  if (IS_ARRAY(methods) && (NUM_WORDS(OOP_TO_OBJ(methods)) > 0))
   {
+    method = methods->object->data[0];
+
     methodData->startingClassOOP = receiverClass;
     methodData->selectorOOP = sendSelector;
     methodData->methodOOP = method;
     /* Sorry, we don't know method's class here :-( */
     methodData->methodClassOOP = _gst_nil_oop;
-    methodData->methodHeader = GET_METHOD_HEADER (method);
+    methodData->methodHeader = GET_METHOD_HEADER ( method );
 
 #ifdef ENABLE_JIT_TRANSLATION
     /* Force the translation to be looked up the next time
@@ -1018,9 +1020,6 @@ _gst_find_method (OOP receiverClass,
     return (true);
   }
   return (false);
-#else
-  return _gst_find_method_builtin(receiverClass, sendSelector, methodData);
-#endif
 }
 
 

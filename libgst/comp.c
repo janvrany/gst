@@ -2927,6 +2927,7 @@ method_info_new (OOP class,
   methodInfo->category = categoryOOP;
   methodInfo->class = class;
   methodInfo->selector = selector;
+  methodInfo->binder = _gst_nil_oop;
 
   while (attrs)
     {

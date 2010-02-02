@@ -500,7 +500,7 @@ static const class_definition class_info[] = {
 
   {&_gst_compiled_method_class, &_gst_compiled_code_class,
    GST_ISP_UCHAR, true, 1,
-   "CompiledMethod", "descriptor ",
+   "CompiledMethod", "descriptor",
    NULL, NULL },
 
   {&_gst_interval_class, &_gst_arrayed_collection_class,
@@ -724,8 +724,8 @@ static const class_definition class_info[] = {
    "Memory", NULL, NULL, NULL },
 
   {&_gst_method_info_class, &_gst_object_class,
-   GST_ISP_POINTER, true, 4,
-   "MethodInfo", "sourceCode category class selector", NULL, NULL },
+   GST_ISP_POINTER, true, 5,
+   "MethodInfo", "sourceCode category class selector binder", NULL, NULL },
 
   {&_gst_file_segment_class, &_gst_object_class,
    GST_ISP_FIXED, true, 3,
