@@ -1,8 +1,3 @@
-Eval [
-	(PackageLoader packageAt: #SUnit) fileIn.
-]
-
-
 Object subclass: MockA [
     
     <category: 'Metaobject protocol'>
@@ -34,7 +29,7 @@ StandardLookup subclass: MockALookup [
 
 ]
 
-TestCase subclass: MOPTests [
+TestCase subclass: MOPBasicTest [
 	| mockA |
 	
 	test_01 [
@@ -56,12 +51,4 @@ TestCase subclass: MOPTests [
 		 			
 		
 	]
-]
-
-
-Eval [
-	
-	((TestSuite named: 'Metaobject protocol tests')
-		addTests: (MOPTests buildSuite tests);
-		run) printNl		
 ]

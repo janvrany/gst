@@ -72,6 +72,9 @@ AT_DIFF_TEST([random-bench.st])
 AT_DIFF_TEST([sieve.st])
 AT_DIFF_TEST([strcat.st])
 
+AT_BANNER([Metaobject protocol support tests.])
+AT_SUNIT_TEST([MOPBasicTest])
+
 AT_BANNER([Basic packages.])
 AT_PACKAGE_TEST([SUnit])
 AT_PACKAGE_TEST([Parser])

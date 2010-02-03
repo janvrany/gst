@@ -77,3 +77,15 @@ m4_define([AT_ANSI_TEST], [
   AT_CHECK_GST([-f $abs_srcdir/AnsiRun.st $1], [$abs_builddir/gst.im], [], [ignore])
   AT_CLEANUP
 ])
+
+dnl AT_SUNIT_TEST([PACKAGE], [XFAILS])
+dnl ---------------------------------
+m4_define([AT_SUNIT_TEST], [
+  AT_SETUP([$1])
+  AT_KEYWORDS([SUnit])
+  $2
+  AT_CHECK_GST([-f $abs_srcdir/$1.st -f $abs_srcdir/AnsiRun.st $1], [$abs_builddir/gst.im], [], [ignore])
+  AT_CLEANUP
+])
+
+
