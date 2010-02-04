@@ -936,37 +936,6 @@ lookup_method (OOP sendSelector,
   return (false);
 }
 
-
-mst_Boolean
-_gst_find_method_builtin (OOP receiverClass,
-	          OOP sendSelector,
-	          method_cache_entry *methodData)
-{
-  OOP method_class = receiverClass;
-  for (; !IS_NIL (method_class); method_class = SUPERCLASS (method_class))
-    {
-      OOP methodOOP = _gst_find_class_method(method_class, sendSelector);
-      if (!IS_NIL (methodOOP))
-        {
-          methodData->startingClassOOP = receiverClass;
-          methodData->selectorOOP = sendSelector;
-          methodData->methodOOP = methodOOP;
-          methodData->methodClassOOP = method_class;
-          methodData->methodHeader = GET_METHOD_HEADER (methodOOP);
-
-#ifdef ENABLE_JIT_TRANSLATION
-          /* Force the translation to be looked up the next time
-           this entry is used for a message send.  */
-          methodData->receiverClass = NULL;
-#endif
-          _gst_cache_misses++;
-          return (true);
-        }
-    }
-
-  return (false);
-}
-
 OOP
 _gst_find_lookup(OOP receiverClass) {
   OOP searchClass = receiverClass;
@@ -980,50 +949,85 @@ _gst_find_lookup(OOP receiverClass) {
   return _gst_nil_oop;
 }
 
+OOP _gst_lookup_in_sender_builtin(OOP selector, OOP initialSearchClass, OOP senderClass) {
+  OOP searchClass = initialSearchClass;
+  OOP method = _gst_nil_oop;
+  OOP methodArray;
+
+  for (; !IS_NIL (searchClass); searchClass = SUPERCLASS (searchClass))
+      {
+        method = _gst_find_class_method(searchClass, selector);
+        if (!IS_NIL (method)) break;
+      }
+  if (!IS_NIL(method)) {
+    /* method found */
+    instantiate_with(_gst_array_class, 1, &methodArray);
+    methodArray->object->data[0] = method;
+    return methodArray;
+  } else {
+    /* method not found */
+    return _gst_nil_oop;
+  }
+
+}
+
+
 mst_Boolean
 _gst_find_method (OOP receiverClass,
                   OOP sendSelector,
                   method_cache_entry *methodData)
 {
+  static int nesting_level = 0;
   OOP lookup;
   OOP methods;
   OOP method;
   OOP lookupArgs[3];
   lookup = _gst_find_lookup(receiverClass);
-  if (IS_NIL(lookup)) {
-    return _gst_find_method_builtin(receiverClass, sendSelector, methodData);
+  if (IS_NIL(lookup) || (lookup == _gst_lookup_builtin_symbol)) {
+    methods = _gst_lookup_in_sender_builtin(sendSelector, receiverClass, OOP_INT_CLASS(_gst_self));
+  } else {
+    /*
+    printf("[VM/_gst_find_method] dispatching #lookup:in:sender:   [level: %d]\n", nesting_level++);
+    printf("                      selector: ");
+    _gst_print_object(sendSelector); printf("\n");
+    printf("                      search:   ");
+    _gst_print_object(receiverClass); printf("\n");
+    */
+    lookupArgs[0] = sendSelector;
+    lookupArgs[1] = receiverClass;
+    lookupArgs[2] = OOP_INT_CLASS(_gst_self);
+    methods = _gst_nvmsg_send (lookup, _gst_lookup_in_sender_symbol, lookupArgs, 3);
+    /*
+    printf("[VM/_gst_find_method] returned from #lookup:in:sender: [level: %d]\n", --nesting_level);
+    */
   }
+  if (IS_NIL(methods)) {
+    return (false);
+  }
+  if (IS_ARRAY(methods)) {
+    if (NUM_WORDS(OOP_TO_OBJ(methods)) == 0) {
+      return (false);
+    } else {
+      method = methods->object->data[0];
 
-  printf("VM: Non-nil lookup object, dispatching #lookup:senderClass:receiverClass:\n");
-  lookupArgs[0] = sendSelector;
-  lookupArgs[1] = receiverClass;
-  lookupArgs[2] = OOP_INT_CLASS(_gst_self);
-  methods = _gst_nvmsg_send (lookup, _gst_lookup_in_sender_symbol, lookupArgs, 3);
-  //printf("VM: #lookup:senderClass:receiverClass:\n");
-  if (IS_ARRAY(methods) && (NUM_WORDS(OOP_TO_OBJ(methods)) > 0))
-  {
-    method = methods->object->data[0];
-
-    methodData->startingClassOOP = receiverClass;
-    methodData->selectorOOP = sendSelector;
-    methodData->methodOOP = method;
-    /* Sorry, we don't know method's class here :-( */
-    methodData->methodClassOOP = _gst_nil_oop;
-    methodData->methodHeader = GET_METHOD_HEADER ( method );
-
+      methodData->startingClassOOP = receiverClass;
+      methodData->selectorOOP = sendSelector;
+      methodData->methodOOP = method;
+      /* Sorry, we don't know method's class here :-( */
+      methodData->methodClassOOP = _gst_nil_oop;
+      methodData->methodHeader = GET_METHOD_HEADER ( method );
 #ifdef ENABLE_JIT_TRANSLATION
-    /* Force the translation to be looked up the next time
-     this entry is used for a message send.  */
-    methodData->receiverClass = NULL;
+      /* Force the translation to be looked up the next time
+       this entry is used for a message send.  */
+      methodData->receiverClass = NULL;
 #endif
-    _gst_cache_misses++;
-    return (true);
+      _gst_cache_misses++;
+      return (true);
+    }
   }
+  printf("[VM/_gst_find_method]: custom lookup didn't return nil neither an instance of an Array!");
   return (false);
 }
-
-
-
 
 OOP
 create_args_array (int numArgs)

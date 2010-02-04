@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   StandardLookup Method Definitions
+|   Lookup Method Definitions
 |
 |
  ======================================================================"
@@ -31,25 +31,28 @@
  ======================================================================"
 
 
-nil subclass: StandardLookup [
+Object subclass: Lookup [
       
-    <category: 'Language-Implementation'>
-
-
-	lookup: selector in: initialSearchClass sender: senderClass [
-		| searchClass methods |		
-		searchClass := initialSearchClass.		
-		methods := #().		
-		[ searchClass notNil ] whileTrue: [			
-			searchClass methodDictionary at: selector 
-				ifPresent:[:method|methods := methods copyWith:method].
-			searchClass := searchClass superclass.
-		].		
-		^methods
-	]
-	
-	doesNotUndestand: aMessage [
-		^#()
-	]
+    <category: 'Language-Implementation-MOP'>
+    <comment: 'I''m an abstract class and represent receiver-side of message lookup. 
+My task is to return an array of applicable methods for given selector, search class and
+sender class. Standard Smalltalk method lookup is represented by an instance of 
+BuiltinLookup.'> 
+    
+    Builtin := nil.
+   
+    Lookup class >> builtin [
+    	Builtin isNil ifTrue:[Builtin := self new].
+    	^Builtin
+    ]
+    
+	lookup: selector in: initialSearchClass sender: senderClass [				
+		"
+		
+		"
+		<category: 'metaobject protocol support'>
+		<primitive: VMpr_Lookup_lookup_in_sender>		
+	]	
 ]
 
+Lookup lookup:#'Lookup builtin'  

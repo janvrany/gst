@@ -384,6 +384,14 @@ extern void _gst_send_message_internal (OOP sendSelector,
 			      OOP method_class) 
   ATTRIBUTE_HIDDEN;
 
+/* Performs a builtin lookup. Returns a one-element array containg method
+ * to matching the selector in given initialSearchClass or _gst_nil_oop if
+ * none found.
+ */
+extern OOP _gst_lookup_in_sender_builtin(OOP selector, OOP initialSearchClass, OOP senderClass)
+  ATTRIBUTE_HIDDEN;
+
+
 /* Prepare the data structures held by the interpreter.  */
 extern void _gst_init_interpreter (void) 
   ATTRIBUTE_HIDDEN;

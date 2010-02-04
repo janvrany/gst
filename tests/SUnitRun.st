@@ -31,6 +31,9 @@
 | base |
 base := File path: (Smalltalk arguments first).
 
+(Smalltalk includesKey: #TestCase) ifFalse:
+	[PackageLoader fileInPackage: #SUnit].
+
 (Smalltalk arguments copyFrom: 2) do: [ :each || file results |
 	[(base / (each , '.st')) fileIn]
 		on: Error 

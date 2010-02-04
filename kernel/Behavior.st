@@ -521,16 +521,38 @@ method dictionary, and iterating over the class hierarchy.'>
 	    ifError: [:fname :lineNo :errorString | requestor error: 'line ' , lineNo printString , ': ' , errorString]
     ]
     
-    
-    lookup [
-    	<category: 'meta-object protocol'>
+    getLookup [
+    	<category: 'private'>
     	^lookup
     ]
     
-    lookup: aLookup [
-    	<category: 'meta-object protocol'>    	
-    	lookup := aLookup.
+    setLookup: lookupObject  [
+    	<category: 'private'>
+    	lookup := lookupObject.
     	self flushCache.
+    ]
+        
+        
+    lookup [    	
+    	"
+    		Returns a method lookup class associated with myself. 
+    	"
+    	<category: 'meta-object protocol'>
+    	| searchBehavior lookupObj |
+		searchBehavior := self.
+		[ searchBehavior notNil and:[(lookupObj := searchBehavior getLookup) isNil] ] whileTrue:
+			[searchBehavior := searchBehavior superclass].
+		lookupObj == nil ifTrue:[^Lookup builtin].				
+		lookupObj == #'Lookup builtin' ifTrue:[^Lookup builtin].
+		^lookupObj    	
+	]
+    
+    lookup: lookupObject [
+    	"
+    		Sets my method lookup object
+    	"
+    	<category: 'meta-object protocol'>        	 
+    	self setLookup: lookupObject    
     ]
     
 

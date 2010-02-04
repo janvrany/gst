@@ -6075,6 +6075,19 @@ primitive VMpr_SystemDictionary_rawProfile [succeed]
   PRIM_SUCCEEDED;
 }
 
+/* Lookup lookup:in:sender: */
+
+primitive VMpr_Lookup_lookup_in_sender [succeed]
+{  
+  OOP senderClass = POP_OOP();
+  OOP initialSearchClass = POP_OOP();
+  OOP selector = POP_OOP();  
+  SET_STACKTOP ( _gst_lookup_in_sender_builtin( selector, initialSearchClass, senderClass) );
+  PRIM_SUCCEEDED;  
+}
+
+
+
 
 #undef INT_BIN_OP
 #undef BOOL_BIN_OP
