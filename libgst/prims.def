@@ -6077,13 +6077,12 @@ primitive VMpr_SystemDictionary_rawProfile [succeed]
 
 /* Lookup lookup:in:sender: */
 
-primitive VMpr_Lookup_lookup_in_sender_method [succeed]
+primitive VMpr_Lookup_lookup_in_for_method [succeed]
 {  
-  OOP senderMethod = POP_OOP();
-  OOP senderClass = POP_OOP();
+  OOP senderMethod = POP_OOP();  
   OOP initialSearchClass = POP_OOP();
   OOP selector = POP_OOP();  
-  SET_STACKTOP ( _gst_lookup_in_sender_method_builtin( selector, initialSearchClass, senderClass, senderMethod) );
+  SET_STACKTOP ( _gst_lookup_in_for_method_builtin( selector, initialSearchClass, senderMethod) );
   PRIM_SUCCEEDED;  
 }
 
