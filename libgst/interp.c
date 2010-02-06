@@ -564,15 +564,14 @@ static void * const *dispatch_vec;
 
 /* Answer an hash value for a send of the SENDSELECTOR message, when
    the CompiledMethod is found in class METHODCLASS.  */
-#define METHOD_CACHE_HASH(sendSelector, methodClass, senderClass, senderMethod)			 \
-    (( ((intptr_t)(sendSelector)) ^ ((intptr_t)(methodClass)) ^ ((intptr_t)(senderClass)) ^ ((intptr_t)(senderMethod)) / (2 * sizeof (PTR))) \
+#define METHOD_CACHE_HASH(sendSelector, methodClass, senderMethod)			 \
+    (( ((intptr_t)(sendSelector)) ^ ((intptr_t)(methodClass)) ^ ((intptr_t)(senderMethod)) / (2 * sizeof (PTR))) \
       & (METHOD_CACHE_SIZE - 1))
 
 /* Checks whether given lookup arguments matches given method data */
-#define METHOD_CACHE_DATA_MATCH(methodData, sendSelector, receiverClass, senderClass, senderMethod) \
+#define METHOD_CACHE_DATA_MATCH(methodData, sendSelector, receiverClass, senderMethod) \
     (    methodData->selectorOOP != sendSelector \
       || methodData->startingClassOOP != receiverClass \
-      || methodData->senderClassOOP != senderClass \
       || methodData->senderMethodOOP != senderMethod \
     )
 
@@ -957,7 +956,7 @@ _gst_find_lookup(OOP receiverClass) {
   return _gst_nil_oop;
 }
 
-OOP _gst_lookup_in_sender_method_builtin(OOP selector, OOP initialSearchClass, OOP senderClass, OOP senderMethod) {
+OOP _gst_lookup_in_for_method_builtin(OOP selector, OOP initialSearchClass, OOP senderMethod) {
   OOP searchClass = initialSearchClass;
   OOP method = _gst_nil_oop;
   OOP methodArray;
@@ -990,10 +989,10 @@ _gst_find_method (OOP receiverClass,
   OOP methods;
   OOP method;
   OOP senderMethod = _gst_this_method;
-  OOP lookupArgs[4];
+  OOP lookupArgs[3];
   lookup = _gst_find_lookup(receiverClass);
   if (IS_NIL(lookup) || (lookup == _gst_lookup_builtin_symbol)) {
-    methods = _gst_lookup_in_sender_method_builtin(sendSelector, receiverClass, OOP_INT_CLASS(_gst_self), senderMethod);
+    methods = _gst_lookup_in_for_method_builtin(sendSelector, receiverClass, senderMethod);
   } else {
     /*
     printf("[VM/_gst_find_method] dispatching #lookup:in:sender:method:   [level: %d]\n", nesting_level++);
@@ -1004,9 +1003,8 @@ _gst_find_method (OOP receiverClass,
     */
     lookupArgs[0] = sendSelector;
     lookupArgs[1] = receiverClass;
-    lookupArgs[2] = OOP_INT_CLASS(_gst_self);
-    lookupArgs[3] = senderMethod;
-    methods = _gst_nvmsg_send (lookup, _gst_lookup_in_sender_method_symbol, lookupArgs, 4);
+    lookupArgs[2] = senderMethod;
+    methods = _gst_nvmsg_send (lookup, _gst_lookup_in_for_method_symbol, lookupArgs, 3);
     /*
     printf("[VM/_gst_find_method] returned from #lookup:in:sender:method: [level: %d]\n", --nesting_level);
     */
@@ -1025,7 +1023,6 @@ _gst_find_method (OOP receiverClass,
       /* lookup data */
       methodData->startingClassOOP = receiverClass;
       methodData->selectorOOP = sendSelector;
-      methodData->senderClassOOP = OOP_INT_CLASS(_gst_self);
       methodData->senderMethodOOP = senderMethod;
 
       /* Sorry, we don't know method's class here :-( */
@@ -1069,10 +1066,10 @@ check_send_correctness (OOP receiver,
   OOP receiverClass;
 
   receiverClass = OOP_INT_CLASS (receiver);
-  hashIndex = METHOD_CACHE_HASH (sendSelector, receiverClass, OOP_INT_CLASS(_gst_self), _gst_this_method);
+  hashIndex = METHOD_CACHE_HASH (sendSelector, receiverClass, _gst_this_method);
   methodData = &method_cache[hashIndex];
 
-  if (METHOD_CACHE_DATA_MATCH(methodData, sendSelector, receiverClass, OOP_INT_CLASS(_gst_self), _gst_this_method ))
+  if (METHOD_CACHE_DATA_MATCH(methodData, sendSelector, receiverClass, _gst_this_method ))
     {
       /* If we do not find the method, don't worry and fire
 	 #doesNotUnderstand:  */

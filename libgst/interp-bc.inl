@@ -192,10 +192,10 @@ _gst_send_message_internal (OOP sendSelector,
      zeros.  */
 
   _gst_sample_counter++;
-  hashIndex = METHOD_CACHE_HASH (sendSelector, method_class, OOP_INT_CLASS(_gst_self), _gst_this_method);
+  hashIndex = METHOD_CACHE_HASH (sendSelector, method_class, _gst_this_method);
   methodData = &method_cache[hashIndex];
 
-  if UNCOMMON (METHOD_CACHE_DATA_MATCH(methodData, sendSelector, method_class, OOP_INT_CLASS(_gst_self), _gst_this_method ))
+  if UNCOMMON (METHOD_CACHE_DATA_MATCH(methodData, sendSelector, method_class, _gst_this_method ))
     {
       /* :-( cache miss )-: */
       if (!lookup_method (sendSelector, methodData, sendArgs, method_class))

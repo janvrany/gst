@@ -129,8 +129,7 @@ typedef struct method_cache_entry
 {
   OOP selectorOOP;
   OOP startingClassOOP;
-  /* Following two entries was added to support MOP. */
-  OOP senderClassOOP;
+  /* Following entry was added to support MOP. */
   OOP senderMethodOOP;
 
   OOP methodOOP; 
@@ -392,7 +391,7 @@ extern void _gst_send_message_internal (OOP sendSelector,
  * to matching the selector in given initialSearchClass or _gst_nil_oop if
  * none found.
  */
-extern OOP _gst_lookup_in_sender_method_builtin(OOP selector, OOP initialSearchClass, OOP senderClass, OOP senderMethod)
+extern OOP _gst_lookup_in_for_method_builtin(OOP selector, OOP initialSearchClass, OOP senderMethod)
   ATTRIBUTE_HIDDEN;
 
 

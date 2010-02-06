@@ -28,14 +28,14 @@ Object subclass: MockC [
 
 Lookup subclass: MockALookup [
 
-	lookup: selector in: initialSearchClass sender: senderClass method: senderMethod [		
-		(selector == #bar and:[senderClass == MockC]) ifTrue:
-			[^super lookup: #foo in: initialSearchClass sender: senderClass method: senderMethod].						
+	lookup: selector in: initialSearchClass forMethod: senderMethod [		
+		(selector == #bar and:[senderMethod == (MockC >> #callBarIn:)]) ifTrue:
+			[^super lookup: #foo in: initialSearchClass forMethod: senderMethod].						
 		(selector == #foo) ifTrue:
-			[^super lookup: #bar in: initialSearchClass sender: senderClass method: senderMethod].
+			[^super lookup: #bar in: initialSearchClass forMethod: senderMethod].
 		(selector == #qux) ifTrue:
 			[^#()].			
-		^super lookup: selector in: initialSearchClass sender: senderClass method: senderMethod
+		^super lookup: selector in: initialSearchClass forMethod: senderMethod
 	]
 
 ]
