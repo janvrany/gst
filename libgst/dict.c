@@ -54,6 +54,12 @@
 
 #include "gstpriv.h"
 
+/* Debaulf lookup object OOP. */
+#define LOOKUP_BUILTIN_OOP _gst_lookup_builtin_symbol
+
+
+
+
 /* this must be big enough that the Smalltalk dictionary does not have to
    grow between the time gst_dictionary is loaded and the time the kernel is
    initialized.  Otherwise some of the methods needed to grow the dictionary
@@ -948,7 +954,7 @@ init_metaclass (OOP metaclassOOP)
       sizeof (OOP)) << ISP_NUMFIXEDFIELDS);
 
   metaclass->methodDictionary = _gst_nil_oop;
-  metaclass->lookup = _gst_nil_oop;
+  metaclass->lookup = LOOKUP_BUILTIN_OOP;
 }
 
 void
@@ -971,8 +977,8 @@ init_class (OOP class_oop, const class_definition *ci)
 
   class->sharedPools = _gst_make_pool_array (ci->sharedPoolNames);
 
-  /* Other fields are set by the Smalltalk code.  */	
-  class->lookup = _gst_nil_oop;
+  class->lookup = LOOKUP_BUILTIN_OOP;
+  /* Other fields are set by the Smalltalk code.  */
   class->methodDictionary = _gst_nil_oop;
   class->comment = _gst_nil_oop;
   class->category = _gst_nil_oop;
