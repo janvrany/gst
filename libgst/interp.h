@@ -129,6 +129,10 @@ typedef struct method_cache_entry
 {
   OOP selectorOOP;
   OOP startingClassOOP;
+  /* Following two entries was added to support MOP. */
+  OOP senderClassOOP;
+  OOP senderMethodOOP;
+
   OOP methodOOP; 
   OOP methodClassOOP; 
   method_header methodHeader;

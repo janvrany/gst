@@ -111,7 +111,7 @@
    separately from this, the interpreter caches the last primitive
    numbers used for sends of #at:, #at:put: and #size, in an attempt
    to speed up these messages for Arrays, Strings, and ByteArrays.  */
-#define METHOD_CACHE_SIZE		(1 << 11)
+#define METHOD_CACHE_SIZE		(1 << 13)
 
 typedef struct async_queue_entry
 {
@@ -564,9 +564,17 @@ static void * const *dispatch_vec;
 
 /* Answer an hash value for a send of the SENDSELECTOR message, when
    the CompiledMethod is found in class METHODCLASS.  */
-#define METHOD_CACHE_HASH(sendSelector, methodClass)			 \
-    (( ((intptr_t)(sendSelector)) ^ ((intptr_t)(methodClass)) / (2 * sizeof (PTR))) \
+#define METHOD_CACHE_HASH(sendSelector, methodClass, senderClass, senderMethod)			 \
+    (( ((intptr_t)(sendSelector)) ^ ((intptr_t)(methodClass)) ^ ((intptr_t)(senderClass)) ^ ((intptr_t)(senderMethod)) / (2 * sizeof (PTR))) \
       & (METHOD_CACHE_SIZE - 1))
+
+/* Checks whether given lookup arguments matches given method data */
+#define METHOD_CACHE_DATA_MATCH(methodData, sendSelector, receiverClass, senderClass, senderMethod) \
+    (    methodData->selectorOOP != sendSelector \
+      || methodData->startingClassOOP != receiverClass \
+      || methodData->senderClassOOP != senderClass \
+      || methodData->senderMethodOOP != senderMethod \
+    )
 
 /* Answer whether CONTEXT is a MethodContext.  This happens whenever
    we have some SmallInteger flags (and not the pointer to the outer
@@ -1012,9 +1020,14 @@ _gst_find_method (OOP receiverClass,
     } else {
       method = methods->object->data[0];
 
+      methodData->methodOOP = method;
+
+      /* lookup data */
       methodData->startingClassOOP = receiverClass;
       methodData->selectorOOP = sendSelector;
-      methodData->methodOOP = method;
+      methodData->senderClassOOP = OOP_INT_CLASS(_gst_self);
+      methodData->senderMethodOOP = senderMethod;
+
       /* Sorry, we don't know method's class here :-( */
       methodData->methodClassOOP = _gst_nil_oop;
       methodData->methodHeader = GET_METHOD_HEADER ( method );
@@ -1056,11 +1069,10 @@ check_send_correctness (OOP receiver,
   OOP receiverClass;
 
   receiverClass = OOP_INT_CLASS (receiver);
-  hashIndex = METHOD_CACHE_HASH (sendSelector, receiverClass);
+  hashIndex = METHOD_CACHE_HASH (sendSelector, receiverClass, OOP_INT_CLASS(_gst_self), _gst_this_method);
   methodData = &method_cache[hashIndex];
 
-  if (methodData->selectorOOP != sendSelector
-      || methodData->startingClassOOP != receiverClass)
+  if (METHOD_CACHE_DATA_MATCH(methodData, sendSelector, receiverClass, OOP_INT_CLASS(_gst_self), _gst_this_method ))
     {
       /* If we do not find the method, don't worry and fire
 	 #doesNotUnderstand:  */

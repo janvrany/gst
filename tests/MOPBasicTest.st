@@ -20,9 +20,17 @@ MockA subclass: MockB [
     ]    
 ]
 
+Object subclass: MockC [
+	callBarIn: anObject [
+		^anObject bar
+	]
+] 
+
 Lookup subclass: MockALookup [
 
 	lookup: selector in: initialSearchClass sender: senderClass method: senderMethod [		
+		(selector == #bar and:[senderClass == MockC]) ifTrue:
+			[^super lookup: #foo in: initialSearchClass sender: senderClass method: senderMethod].						
 		(selector == #foo) ifTrue:
 			[^super lookup: #bar in: initialSearchClass sender: senderClass method: senderMethod].
 		(selector == #qux) ifTrue:
@@ -78,5 +86,18 @@ TestCase subclass: MOPBasicTest [
 		MockA lookup: MockALookup new.
 		self assert: (MockA lookup class == MockALookup).
 		self assert: (MockB lookup class == MockALookup).
+	]
+	
+	test03 [
+		"Tests proper selector cache behavior"
+		mock := MockA new.
+		
+		self assert: (mock bar) == #bar.
+		self assert: (MockC new callBarIn: mock) == #bar.
+						
+		MockA lookup: MockALookup new.
+		
+		self assert: (mock bar) == #bar.
+		self assert: (MockC new callBarIn: mock) == #foo.		
 	]
 ]
