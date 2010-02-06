@@ -949,7 +949,7 @@ _gst_find_lookup(OOP receiverClass) {
   return _gst_nil_oop;
 }
 
-OOP _gst_lookup_in_sender_builtin(OOP selector, OOP initialSearchClass, OOP senderClass) {
+OOP _gst_lookup_in_sender_method_builtin(OOP selector, OOP initialSearchClass, OOP senderClass, OOP senderMethod) {
   OOP searchClass = initialSearchClass;
   OOP method = _gst_nil_oop;
   OOP methodArray;
@@ -981,13 +981,14 @@ _gst_find_method (OOP receiverClass,
   OOP lookup;
   OOP methods;
   OOP method;
-  OOP lookupArgs[3];
+  OOP senderMethod = _gst_this_method;
+  OOP lookupArgs[4];
   lookup = _gst_find_lookup(receiverClass);
   if (IS_NIL(lookup) || (lookup == _gst_lookup_builtin_symbol)) {
-    methods = _gst_lookup_in_sender_builtin(sendSelector, receiverClass, OOP_INT_CLASS(_gst_self));
+    methods = _gst_lookup_in_sender_method_builtin(sendSelector, receiverClass, OOP_INT_CLASS(_gst_self), senderMethod);
   } else {
     /*
-    printf("[VM/_gst_find_method] dispatching #lookup:in:sender:   [level: %d]\n", nesting_level++);
+    printf("[VM/_gst_find_method] dispatching #lookup:in:sender:method:   [level: %d]\n", nesting_level++);
     printf("                      selector: ");
     _gst_print_object(sendSelector); printf("\n");
     printf("                      search:   ");
@@ -996,9 +997,10 @@ _gst_find_method (OOP receiverClass,
     lookupArgs[0] = sendSelector;
     lookupArgs[1] = receiverClass;
     lookupArgs[2] = OOP_INT_CLASS(_gst_self);
-    methods = _gst_nvmsg_send (lookup, _gst_lookup_in_sender_symbol, lookupArgs, 3);
+    lookupArgs[3] = senderMethod;
+    methods = _gst_nvmsg_send (lookup, _gst_lookup_in_sender_method_symbol, lookupArgs, 4);
     /*
-    printf("[VM/_gst_find_method] returned from #lookup:in:sender: [level: %d]\n", --nesting_level);
+    printf("[VM/_gst_find_method] returned from #lookup:in:sender:method: [level: %d]\n", --nesting_level);
     */
   }
   if (IS_NIL(methods)) {

@@ -388,7 +388,7 @@ extern void _gst_send_message_internal (OOP sendSelector,
  * to matching the selector in given initialSearchClass or _gst_nil_oop if
  * none found.
  */
-extern OOP _gst_lookup_in_sender_builtin(OOP selector, OOP initialSearchClass, OOP senderClass)
+extern OOP _gst_lookup_in_sender_method_builtin(OOP selector, OOP initialSearchClass, OOP senderClass, OOP senderMethod)
   ATTRIBUTE_HIDDEN;
 
 

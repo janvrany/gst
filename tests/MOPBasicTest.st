@@ -22,12 +22,12 @@ MockA subclass: MockB [
 
 Lookup subclass: MockALookup [
 
-	lookup: selector in: initialSearchClass sender: senderClass [		
+	lookup: selector in: initialSearchClass sender: senderClass method: senderMethod [		
 		(selector == #foo) ifTrue:
-			[^super lookup: #bar in: initialSearchClass sender: senderClass].
+			[^super lookup: #bar in: initialSearchClass sender: senderClass method: senderMethod].
 		(selector == #qux) ifTrue:
 			[^#()].			
-		^super lookup: selector in: initialSearchClass sender: senderClass
+		^super lookup: selector in: initialSearchClass sender: senderClass method: senderMethod
 	]
 
 ]

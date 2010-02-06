@@ -46,12 +46,12 @@ BuiltinLookup.'>
     	^Builtin
     ]
     
-	lookup: selector in: initialSearchClass sender: senderClass [				
+	lookup: selector in: initialSearchClass sender: senderClass method: senderMethod [				
 		"
 		
 		"
 		<category: 'metaobject protocol support'>
-		<primitive: VMpr_Lookup_lookup_in_sender>		
+		<primitive: VMpr_Lookup_lookup_in_sender_method>		
 	]	
 ]
 
