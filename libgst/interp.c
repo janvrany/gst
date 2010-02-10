@@ -956,6 +956,11 @@ _gst_find_lookup(OOP receiverClass) {
   return _gst_nil_oop;
 }
 
+OOP _gst_find_binder(OOP method) {
+  OOP info = ((gst_compiled_method)(OOP_TO_OBJ(method)))->descriptor;
+  return ((gst_method_info)(OOP_TO_OBJ(info)))->binder;
+}
+
 OOP _gst_lookup_in_for_method_builtin(OOP selector, OOP initialSearchClass, OOP senderMethod) {
   OOP searchClass = initialSearchClass;
   OOP method = _gst_nil_oop;
@@ -979,65 +984,116 @@ OOP _gst_lookup_in_for_method_builtin(OOP selector, OOP initialSearchClass, OOP 
 }
 
 
+
+OOP _gst_find_methods(OOP selector, OOP receiverClass, OOP senderMethod) {
+  static int nesting_level = 0;
+  OOP lookup = _gst_find_lookup(receiverClass);
+  OOP lookupArgs[3];
+  OOP methods;
+  if (IS_NIL(lookup) || (lookup == _gst_lookup_builtin_symbol)) {
+      methods = _gst_lookup_in_for_method_builtin(selector, receiverClass, senderMethod);
+    } else {
+      /*
+      printf("[VM/_gst_find_methods] dispatching #lookup:in:forMethod:   [level: %d]\n", nesting_level++);
+      printf("                      selector: ");
+      _gst_print_object(sendSelector); printf("\n");
+      printf("                      search:   ");
+      _gst_print_object(receiverClass); printf("\n");
+      */
+      lookupArgs[0] = selector;
+      lookupArgs[1] = receiverClass;
+      lookupArgs[2] = senderMethod;
+      methods = _gst_nvmsg_send (lookup, _gst_lookup_in_for_method_symbol, lookupArgs, 3);
+      /*
+      printf("[VM/_gst_find_methods] returned from #lookup:in:forMethod: [level: %d]\n", --nesting_level);
+      */
+    }
+  return methods;
+}
+
+inline OOP _gst_bind_for_method_builtin(OOP methods,OOP senderMethod) {
+  if (IS_ARRAY(methods)) {
+    if (NUM_WORDS(OOP_TO_OBJ(methods)) == 0) {
+      return _gst_nil_oop;
+    } else {
+      return methods->object->data[0];
+    }
+  }
+  /* non-array object */
+  return _gst_nil_oop;
+}
+
+
+OOP _gst_bind_method(OOP methods,OOP senderMethod) {
+  OOP binder = _gst_find_binder(senderMethod);
+  OOP bindArgs[2];
+  OOP method;
+
+  //binder = _gst_nil_oop;
+
+  if (IS_NIL(binder)) {
+    method = _gst_bind_for_method_builtin( methods, senderMethod);
+  } else {
+    printf("Non-nil binder\n");
+    bindArgs[0] = methods;
+    bindArgs[1] = senderMethod;
+    method = _gst_nvmsg_send (binder, _gst_bind_for_method_symbol, bindArgs, 2);
+  }
+  return method;
+}
+
 mst_Boolean
 _gst_find_method (OOP receiverClass,
                   OOP sendSelector,
                   method_cache_entry *methodData)
 {
-  static int nesting_level = 0;
-  OOP lookup;
+  OOP senderMethod;
   OOP methods;
   OOP method;
-  OOP senderMethod = _gst_this_method;
-  OOP lookupArgs[3];
-  lookup = _gst_find_lookup(receiverClass);
-  if (IS_NIL(lookup) || (lookup == _gst_lookup_builtin_symbol)) {
-    methods = _gst_lookup_in_for_method_builtin(sendSelector, receiverClass, senderMethod);
+
+  //TODO: should use kind of #isKindOf:
+  if (OOP_INT_CLASS(_gst_this_method) == _gst_compiled_block_class) {
+    senderMethod = ((gst_compiled_block)(OOP_TO_OBJ(_gst_this_method)))->method;
   } else {
-    /*
-    printf("[VM/_gst_find_method] dispatching #lookup:in:sender:method:   [level: %d]\n", nesting_level++);
-    printf("                      selector: ");
-    _gst_print_object(sendSelector); printf("\n");
-    printf("                      search:   ");
-    _gst_print_object(receiverClass); printf("\n");
-    */
-    lookupArgs[0] = sendSelector;
-    lookupArgs[1] = receiverClass;
-    lookupArgs[2] = senderMethod;
-    methods = _gst_nvmsg_send (lookup, _gst_lookup_in_for_method_symbol, lookupArgs, 3);
-    /*
-    printf("[VM/_gst_find_method] returned from #lookup:in:sender:method: [level: %d]\n", --nesting_level);
-    */
+    senderMethod = _gst_this_method;
   }
-  if (IS_NIL(methods)) {
-    return (false);
-  }
-  if (IS_ARRAY(methods)) {
-    if (NUM_WORDS(OOP_TO_OBJ(methods)) == 0) {
-      return (false);
-    } else {
-      method = methods->object->data[0];
 
-      methodData->methodOOP = method;
+  /*
+  gst_method_info info = (gst_method_info)(OOP_TO_OBJ(((gst_compiled_method)(OOP_TO_OBJ(senderMethod)))->descriptor));
+  printf("[VM/_gst_find_method]:\n");
+  printf("                      sender method class:   ");
+  _gst_print_object(info->class); printf("\n");
+  printf("                      sender method selector:");
+  _gst_print_object(info->selector); printf("\n");
+  */
 
-      /* lookup data */
-      methodData->startingClassOOP = receiverClass;
-      methodData->selectorOOP = sendSelector;
-      methodData->senderMethodOOP = senderMethod;
+  methods = _gst_find_methods(sendSelector, receiverClass, senderMethod);
+  method =  _gst_bind_method(methods, senderMethod);
 
-      /* Sorry, we don't know method's class here :-( */
-      methodData->methodClassOOP = _gst_nil_oop;
-      methodData->methodHeader = GET_METHOD_HEADER ( method );
+  /* TODO: check for an instance of method */
+  if (!IS_NIL(method)) {
+    methodData->methodOOP = method;
+
+    /* lookup data */
+    methodData->startingClassOOP = receiverClass;
+    methodData->selectorOOP = sendSelector;
+    methodData->senderMethodOOP = senderMethod;
+
+    /* Sorry, we don't know method's class here :-( */
+    methodData->methodClassOOP = _gst_nil_oop;
+    methodData->methodHeader = GET_METHOD_HEADER ( method );
 #ifdef ENABLE_JIT_TRANSLATION
-      /* Force the translation to be looked up the next time
+    /* Force the translation to be looked up the next time
        this entry is used for a message send.  */
-      methodData->receiverClass = NULL;
+    methodData->receiverClass = NULL;
 #endif
-      _gst_cache_misses++;
-      return (true);
-    }
+    _gst_cache_misses++;
+    return (true);
   }
-  printf("[VM/_gst_find_method]: custom lookup didn't return nil neither an instance of an Array!");
+  if (sendSelector == _gst_does_not_understand_symbol) {
+    printf("Recursive doesNotUnderstand:, aborting\n");
+    abort();
+  }
   return (false);
 }
 

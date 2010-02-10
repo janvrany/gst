@@ -26,6 +26,31 @@ Object subclass: MockC [
 	]
 ] 
 
+Object subclass: MockD [
+	foo [
+		^self baz
+	]
+	
+	bar [
+		^self baz
+	]
+	
+	baz [
+		'baz' printNl.
+		^#baz
+	]		
+	
+	
+	bind: methods forMethod: senderMethod [
+		| method |		
+		methods isEmpty ifTrue:[^nil].
+		method := methods first.		
+		^(method descriptor selector == #baz)
+			ifTrue:[nil]
+			ifFalse:[method]			
+	]
+]
+
 Lookup subclass: MockALookup [
 
 	lookup: selector in: initialSearchClass forMethod: senderMethod [		
@@ -99,5 +124,19 @@ TestCase subclass: MOPBasicTest [
 		
 		self assert: (mock bar) == #bar.
 		self assert: (MockC new callBarIn: mock) == #foo.		
+	]
+	
+	test04 [
+		"Tests binder"
+
+		mock := MockD new.
+		self assert: mock foo = #baz.
+		self assert: mock bar = #baz.
+							
+		(MockD >> #foo) descriptor binder: mock.
+			
+		self should:[mock foo] raise: Error.		
+		self assert: mock bar = #baz.
+									
 	]
 ]

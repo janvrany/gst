@@ -83,6 +83,18 @@ code of the method.'>
 	<category: 'accessing'>
 	selector := aSymbol
     ]
+    
+    binder [
+    <category: 'accessing'>
+    ^binder
+    ]
+    
+    binder: anObject [
+    <category: 'accessing'>
+    binder := anObject.
+    self class flushCache.
+    ]
+    
 
     stripSourceCode [
 	"Remove the reference to the source code for the method"

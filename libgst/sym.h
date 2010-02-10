@@ -169,7 +169,7 @@ extern OOP _gst_while_false_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_while_true_colon_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_while_true_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_lookup_in_for_method_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_bind_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_bind_for_method_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_lookup_builtin_symbol ATTRIBUTE_HIDDEN;
 
 extern OOP _gst_symbol_table ATTRIBUTE_HIDDEN;
