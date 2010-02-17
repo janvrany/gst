@@ -961,21 +961,32 @@ OOP _gst_find_binder(OOP method) {
   return ((gst_method_info)(OOP_TO_OBJ(info)))->binder;
 }
 
+#define METHODS_BUFFER_SIZE 64 /* mostly random constant :-) */
 OOP _gst_lookup_in_for_method_builtin(OOP selector, OOP initialSearchClass, OOP senderMethod) {
   OOP searchClass = initialSearchClass;
   OOP method = _gst_nil_oop;
-  OOP methodArray;
+  OOP methods[METHODS_BUFFER_SIZE];
+  int methodsFound = 0;
+  int i;
+  OOP methodsArray;
 
   for (; !IS_NIL (searchClass); searchClass = SUPERCLASS (searchClass))
       {
         method = _gst_find_class_method(searchClass, selector);
-        if (!IS_NIL (method)) break;
+        if (!IS_NIL (method)) {
+          methods[methodsFound++] = method;
+          if (methodsFound == (METHODS_BUFFER_SIZE + 1)) {
+            /* Internal methods buffer overrun, stop here. Maybe an exception? */
+            break;
+          }
+        }
       }
-  if (!IS_NIL(method)) {
-    /* method found */
-    instantiate_with(_gst_array_class, 1, &methodArray);
-    methodArray->object->data[0] = method;
-    return methodArray;
+  if (methodsFound) {
+    /* method(s) found, instantiate and fill in the methodsArray */
+    instantiate_with(_gst_array_class, methodsFound, &methodsArray);
+    for (i = 0; i < methodsFound; i++)
+    methodsArray->object->data[i] = methods[i];
+    return methodsArray;
   } else {
     /* method not found */
     return _gst_nil_oop;
@@ -1034,7 +1045,6 @@ OOP _gst_bind_method(OOP methods,OOP senderMethod) {
   if (IS_NIL(binder)) {
     method = _gst_bind_for_method_builtin( methods, senderMethod);
   } else {
-    printf("Non-nil binder\n");
     bindArgs[0] = methods;
     bindArgs[1] = senderMethod;
     method = _gst_nvmsg_send (binder, _gst_bind_for_method_symbol, bindArgs, 2);
