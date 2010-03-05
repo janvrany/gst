@@ -172,9 +172,12 @@ OOP _gst_while_false_colon_symbol = NULL;
 OOP _gst_while_false_symbol = NULL;
 OOP _gst_while_true_colon_symbol = NULL;
 OOP _gst_while_true_symbol = NULL;
+
 OOP _gst_lookup_in_for_method_symbol = NULL;
 OOP _gst_lookup_builtin_symbol = NULL;
 OOP _gst_bind_for_method_symbol = NULL;
+OOP _gst_recursive_lookup_error_symbol = NULL;
+
 OOP _gst_current_namespace = NULL;
 
 OOP temporaries_dictionary = NULL;
@@ -339,6 +342,7 @@ static const symbol_info sym_info[] = {
   {&_gst_lookup_in_for_method_symbol, "lookup:in:forMethod:"},
   {&_gst_lookup_builtin_symbol,  "Lookup builtin"},
   {&_gst_bind_for_method_symbol, "bind:forMethod:" },
+  {&_gst_recursive_lookup_error_symbol, "recursiveLookupError:"},
   {NULL, NULL},
 };
 

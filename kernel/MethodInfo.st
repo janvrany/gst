@@ -91,6 +91,8 @@ code of the method.'>
     
     binder: anObject [
     <category: 'accessing'>
+    (anObject respondsTo:#bind:forMethod:) ifFalse:
+    	[^self error:'Binder does not understand #bind:forMethod:'].
     binder := anObject.
     self class flushCache.
     ]

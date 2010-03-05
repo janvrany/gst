@@ -985,7 +985,7 @@ OOP _gst_lookup_in_for_method_builtin(OOP selector, OOP initialSearchClass, OOP 
     /* method(s) found, instantiate and fill in the methodsArray */
     instantiate_with(_gst_array_class, methodsFound, &methodsArray);
     for (i = 0; i < methodsFound; i++)
-    methodsArray->object->data[i] = methods[i];
+      methodsArray->object->data[i] = methods[i];
     return methodsArray;
   } else {
     /* method not found */
@@ -1004,20 +1004,22 @@ OOP _gst_find_methods(OOP selector, OOP receiverClass, OOP senderMethod) {
   if (IS_NIL(lookup) || (lookup == _gst_lookup_builtin_symbol)) {
       methods = _gst_lookup_in_for_method_builtin(selector, receiverClass, senderMethod);
     } else {
-      /*
+      /**/
       printf("[VM/_gst_find_methods] dispatching #lookup:in:forMethod:   [level: %d]\n", nesting_level++);
-      printf("                      selector: ");
-      _gst_print_object(sendSelector); printf("\n");
-      printf("                      search:   ");
+      printf("                       selector: ");
+      _gst_print_object(selector); printf("\n");
+      printf("                       search:   ");
       _gst_print_object(receiverClass); printf("\n");
-      */
+      /**/
       lookupArgs[0] = selector;
       lookupArgs[1] = receiverClass;
       lookupArgs[2] = senderMethod;
       methods = _gst_nvmsg_send (lookup, _gst_lookup_in_for_method_symbol, lookupArgs, 3);
-      /*
+
+      /**/
       printf("[VM/_gst_find_methods] returned from #lookup:in:forMethod: [level: %d]\n", --nesting_level);
-      */
+      printf("                      "); _gst_print_object(methods); printf("\n");
+      /**/
     }
   return methods;
 }
@@ -1052,6 +1054,30 @@ OOP _gst_bind_method(OOP methods,OOP senderMethod) {
   return method;
 }
 
+
+typedef struct _gst_find_method_activation _gst_find_method_activation;
+
+struct _gst_find_method_activation {
+  OOP receiverClass;
+  OOP sendSelector;
+  OOP senderMethod;
+  _gst_find_method_activation* next;
+};
+
+static mst_Boolean _gst_find_method_is_recursive(OOP receiverClass, OOP sendSelector,
+    OOP senderMethod, _gst_find_method_activation* activationList) {
+  while (activationList){
+    if (activationList->receiverClass == receiverClass &&
+        activationList->sendSelector == sendSelector &&
+        activationList->senderMethod == senderMethod){
+      return true;
+    }
+    activationList = activationList->next;
+  }
+
+  return false;
+}
+
 mst_Boolean
 _gst_find_method (OOP receiverClass,
                   OOP sendSelector,
@@ -1060,6 +1086,10 @@ _gst_find_method (OOP receiverClass,
   OOP senderMethod;
   OOP methods;
   OOP method;
+  static _gst_find_method_activation* activations = NULL;
+  static mst_Boolean recursive_lookup_flag = false;
+  _gst_find_method_activation current_activation;
+
 
   //TODO: should use kind of #isKindOf:
   if (OOP_INT_CLASS(_gst_this_method) == _gst_compiled_block_class) {
@@ -1067,6 +1097,26 @@ _gst_find_method (OOP receiverClass,
   } else {
     senderMethod = _gst_this_method;
   }
+
+  current_activation.senderMethod = senderMethod;
+  current_activation.receiverClass = receiverClass;
+  current_activation.sendSelector = sendSelector;
+  current_activation.next = activations;
+  activations = &current_activation;
+
+  if (_gst_find_method_is_recursive(receiverClass, sendSelector, senderMethod, activations->next)){
+    if (recursive_lookup_flag) {
+      printf("Recursive custom lookup detected!\n");
+      abort();
+    } else {
+      recursive_lookup_flag = true;
+      method = _gst_nvmsg_send(_gst_object_memory_class, _gst_recursive_lookup_error_symbol, &_gst_nil_oop, 1);
+      recursive_lookup_flag = false;
+      goto method_found;
+    }
+  }
+
+
 
   /*
   gst_method_info info = (gst_method_info)(OOP_TO_OBJ(((gst_compiled_method)(OOP_TO_OBJ(senderMethod)))->descriptor));
@@ -1079,6 +1129,10 @@ _gst_find_method (OOP receiverClass,
 
   methods = _gst_find_methods(sendSelector, receiverClass, senderMethod);
   method =  _gst_bind_method(methods, senderMethod);
+
+  method_found:
+
+  activations = current_activation.next;
 
   /* TODO: check for an instance of method */
   if (!IS_NIL(method)) {

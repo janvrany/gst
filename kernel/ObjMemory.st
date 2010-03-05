@@ -641,6 +641,12 @@ state.'>
 	<primitive: VMpr_ObjectMemory_update>
 	self primitiveFailed
     ]
+    
+    ObjectMemory class >> recursiveLookupError: errorData [
+    	'Recursive lookup error detected: ' print.
+    	errorData printNl.
+    	^nil
+    ]
 ]
 
 

@@ -549,9 +549,18 @@ method dictionary, and iterating over the class hierarchy.'>
     
     lookup: lookupObject [
     	"
-    		Sets my method lookup object
+    		Sets my method lookup object. This method does some
+			basic checks in order to avoid ususal bugs    			
     	"
-    	<category: 'meta-object protocol'>        	 
+    	<category: 'meta-object protocol'>
+    	(lookupObject == nil) ifTrue:
+    		[^self setLookup: lookupObject].    	
+    	(lookupObject == #'Lookup builtin') ifTrue:
+    		[^self setLookup: lookupObject].
+    	(lookupObject respondsTo: #lookup:in:forMethod:) ifFalse:
+    		[^self error: lookupObject printString , ' does not understand #lookup:in:forMethod:'].
+		(lookupObject respondsTo: #lookup:) ifTrue:
+			[lookupObject lookup: self getLookup].    		          	 
     	self setLookup: lookupObject    
     ]
     
