@@ -76,6 +76,7 @@ AT_BANNER([Metaobject protocol support tests.])
 AT_SUNIT_TEST([MOPBasicTest])
 AT_SUNIT_TEST([MOPPublicPrivateProtectedTest])
 AT_SUNIT_TEST([MOPMethodNamespacesTest])
+AT_SUNIT_TEST([MOTraitsTest])
 
 AT_BANNER([Basic packages.])
 AT_PACKAGE_TEST([SUnit])

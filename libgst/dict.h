@@ -295,6 +295,7 @@ typedef struct gst_class
   OOP sharedPools;
   OOP securityPolicy;
   OOP pragmaHandlers;
+  OOP traitComposition;
 }
  *gst_class;
 

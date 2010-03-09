@@ -33,7 +33,7 @@
 
 
 ClassDescription subclass: Class [
-    | name comment category environment classVariables sharedPools securityPolicy pragmaHandlers |
+    | name comment category environment classVariables sharedPools securityPolicy pragmaHandlers traitComposition |
     
     <category: 'Language-Implementation'>
     <comment: 'I am THE class object.  My instances are the classes of the system.
@@ -779,6 +779,18 @@ the class category.'>
 	(self isFixed or: [indexed isNil]) ifTrue: [^object].
 	indexed keysAndValuesDo: [:i :obj | object basicAt: i put: obj].
 	^object
+    ]
+    
+    traitComposition [
+    "Answers my trait composition"
+    <category: 'traits'>
+    ^traitComposition
+    ]
+    
+    traitComposition: composition [
+    "Sets my trait composition"
+    <category: 'traits'>
+    traitComposition := composition.
     ]
 ]
 

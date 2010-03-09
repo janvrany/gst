@@ -758,8 +758,8 @@ _gst_execute_statements (tree_node temps,
     ("%lu primitives, %lu inline cache misses since last cache cleanup\n",
      _gst_primitives_executed, _gst_sample_counter);
 #else
-  if (!_gst_bytecode_counter)
-    return (_gst_last_returned_value);
+  //if (!_gst_bytecode_counter)
+  //  return (_gst_last_returned_value);
 
   printf ("%lu primitives, percent %.2f\n", _gst_primitives_executed,
 	  100.0 * _gst_primitives_executed / _gst_bytecode_counter);
