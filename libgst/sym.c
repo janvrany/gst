@@ -170,6 +170,7 @@ OOP _gst_while_false_symbol = NULL;
 OOP _gst_while_true_colon_symbol = NULL;
 OOP _gst_while_true_symbol = NULL;
 OOP _gst_current_namespace = NULL;
+OOP _gst_current_package = NULL;
 
 /* Symbols inside the builtin selectors */
 OOP _gst_initialize_symbol = NULL;

@@ -517,9 +517,12 @@ _gst_initialize (const char *kernel_dir,
       _gst_init_interpreter ();
       _gst_init_vmproxy ();
 
+      _gst_current_package = FROM_INT(-1);
       _gst_install_initial_methods ();
 
       result = load_standard_files ();
+
+      _gst_current_package = _gst_nil_oop;
       _gst_regression_testing = willRegressTest;
       if (result)
 	return result;

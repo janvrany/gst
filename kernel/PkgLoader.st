@@ -1197,7 +1197,20 @@ Kernel.PackageInfo subclass: Package [
 information on a Smalltalk package, and can output my description in
 XML.'>
 
+    Current := nil.    
+
     Package class [ | Tags | ]
+
+    Package class >> current [
+        <category: 'accessing'>
+        ^ Current	
+    ]
+
+   Package class >> current: aPackage [
+        <category: 'accessing'>
+        <primitive: VMpr_Package_setCurrent>
+	Current := aPackage
+   ]
 
     Package class >> tags [
        <category: 'accessing'>
@@ -1559,13 +1572,15 @@ XML.'>
        "Private - File in the given package without paying attention at
         dependencies and C callout availability"
 	<category: 'accessing'>
-	| dir namespace |
+	| dir namespace package |
 	self loaded ifTrue: [^self].
 	dir := Directory working.
 	namespace := Namespace current.
+        package := Package current.
 	
 	[| loadedFiles |
 	Namespace current: self createNamespace.
+	Package current: self.
 	self directory isNil ifFalse: [Directory working: self directory].
 	self libraries do: [:each | DLD addLibrary: each].
 	self modules do: [:each | DLD addModule: each].
@@ -1581,7 +1596,8 @@ XML.'>
 	self features do: [:each | Smalltalk addFeature: each]] 
 		ensure: 
 		    [Directory working: dir.
-		    Namespace current: namespace]
+		    Namespace current: namespace.
+		    Package current: package]
     ]
 
     path [

@@ -221,7 +221,8 @@ static OOP method_info_new (OOP class,
 			    OOP selector,
 			    method_attributes *attrs,
 			    OOP sourceCode,
-			    OOP categoryOOP);
+			    OOP categoryOOP,
+				OOP packageOOP);
 
 /* This creates a CompiledBlock for the given BYTECODES.  The bytecodes
    are passed through the peephole optimizer and stored, the header is
@@ -2694,7 +2695,7 @@ _gst_make_new_method (int numArgs,
     }
 
   methodDesc = method_info_new (class, selector, method_attrs,
-				sourceCode, categoryOOP);
+				sourceCode, categoryOOP, _gst_current_package != NULL ? _gst_current_package : _gst_nil_oop);
   INC_ADD_OOP (methodDesc);
 
   method_attrs = NULL;
@@ -2804,7 +2805,8 @@ method_info_new (OOP class,
 		 OOP selector,
 		 method_attributes *attrs,
 		 OOP sourceCode,
-		 OOP categoryOOP)
+		 OOP categoryOOP,
+		 OOP packageOOP)
 {
   method_attributes *next;
   gst_method_info methodInfo;
@@ -2820,6 +2822,7 @@ method_info_new (OOP class,
   methodInfo->class = class;
   methodInfo->selector = selector;
   methodInfo->debugInfo = _gst_nil_oop;
+  methodInfo->package = packageOOP;
 
   while (attrs)
     {

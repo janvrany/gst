@@ -161,6 +161,7 @@ extern OOP _gst_while_true_colon_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_while_true_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_symbol_table ATTRIBUTE_HIDDEN;
 extern OOP _gst_current_namespace ATTRIBUTE_HIDDEN;
+extern OOP _gst_current_package ATTRIBUTE_HIDDEN;
 
 /* This returns the name of the given scope (instance variable, temporary, ...). */
 extern const char *_gst_get_scope_kind (scope_type scope)

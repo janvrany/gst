@@ -6156,6 +6156,18 @@ primitive VMpr_Namespace_setCurrent [fail]
   PRIM_FAILED;
 }
 
+/* Package current: aPackage */
+primitive VMpr_Package_setCurrent [fail]
+{
+  OOP oop1;
+
+  _gst_primitives_executed++;  
+  _gst_current_package = STACKTOP ();
+  
+  /* Always fail */
+  PRIM_FAILED;
+}
+
 primitive VMpr_ObjectMemory_gcPrimitives :
      prim_id VMpr_ObjectMemory_scavenge [succeed],
      prim_id VMpr_ObjectMemory_compact [succeed],

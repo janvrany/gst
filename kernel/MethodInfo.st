@@ -33,7 +33,7 @@
 
 
 Object subclass: MethodInfo [
-    | sourceCode category class selector debugInfo |
+    | sourceCode category class selector debugInfo package |
     
     <shape: #pointer>
     <category: 'Language-Implementation'>
