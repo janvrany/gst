@@ -207,12 +207,6 @@ tree_store_set_oop (GtkTreeStore *store,
 
 /* Wrappers for macros and missing accessor functions.  */
 
-static GdkWindow *
-widget_get_window (GtkWidget *widget)
-{
-  return widget->window;
-}
-
 static int
 widget_get_state (GtkWidget *widget)
 {
@@ -237,25 +231,6 @@ widget_unset_flags (GtkWidget *widget, int flags)
   GTK_WIDGET_UNSET_FLAGS (widget, flags);
 }
 
-
-static GtkAllocation *
-widget_get_allocation (GtkWidget *wgt)
-{
-  return &(GTK_WIDGET(wgt)->allocation);
-}
-
-static GtkWidget *
-dialog_get_vbox (GtkDialog *dlg)
-{
-  return (GTK_DIALOG(dlg)->vbox);
-}
-
-static GtkWidget *
-dialog_get_action_area (GtkDialog *dlg)
-{
-  return (GTK_DIALOG(dlg)->action_area);
-}
-
 static int
 scrolled_window_get_hscrollbar_visible (GtkScrolledWindow *swnd)
 {
@@ -266,24 +241,6 @@ static int
 scrolled_window_get_vscrollbar_visible (GtkScrolledWindow *swnd)
 {
   return (GTK_SCROLLED_WINDOW(swnd)->vscrollbar_visible);
-}
-
-static int
-adjustment_get_lower (GtkAdjustment *adj)
-{
-  return (GTK_ADJUSTMENT(adj)->lower);
-}
-
-static int
-adjustment_get_upper (GtkAdjustment *adj)
-{
-  return (GTK_ADJUSTMENT(adj)->upper);
-}
-
-static int
-adjustment_get_page_size (GtkAdjustment *adj)
-{
-  return (GTK_ADJUSTMENT(adj)->page_size);
 }
 
 /* Initialization.  */
@@ -315,18 +272,11 @@ gst_initModule (proxy)
   _gtk_vm_proxy->defineCFunc ("gstGtkGetFlags", widget_get_flags);
   _gtk_vm_proxy->defineCFunc ("gstGtkSetFlags", widget_set_flags);
   _gtk_vm_proxy->defineCFunc ("gstGtkUnsetFlags", widget_unset_flags);
-  _gtk_vm_proxy->defineCFunc ("gstGtkGetWindow", widget_get_window);
   _gtk_vm_proxy->defineCFunc ("gstGtkGetHscrollbarVisible", scrolled_window_get_hscrollbar_visible);
   _gtk_vm_proxy->defineCFunc ("gstGtkGetVscrollbarVisible", scrolled_window_get_vscrollbar_visible);
-  _gtk_vm_proxy->defineCFunc ("gstGtkAdjustmentGetLower", adjustment_get_lower);
-  _gtk_vm_proxy->defineCFunc ("gstGtkAdjustmentGetUpper", adjustment_get_upper);
-  _gtk_vm_proxy->defineCFunc ("gstGtkAdjustmentGetPageSize", adjustment_get_page_size);
   _gtk_vm_proxy->defineCFunc ("gstGtkTreeModelGetOOP", tree_model_get_oop);
   _gtk_vm_proxy->defineCFunc ("gstGtkListStoreSetOOP", list_store_set_oop);
   _gtk_vm_proxy->defineCFunc ("gstGtkTreeStoreSetOOP", tree_store_set_oop);
-  _gtk_vm_proxy->defineCFunc ("gstGtkWidgetGetAllocation", widget_get_allocation);
-  _gtk_vm_proxy->defineCFunc ("gstGtkDialogGetVBox", dialog_get_vbox);
-  _gtk_vm_proxy->defineCFunc ("gstGtkDialogGetActionArea", dialog_get_action_area);
 
   _gtk_vm_proxy->defineCFunc ("gtk_placer_get_type", gtk_placer_get_type);
   _gtk_vm_proxy->defineCFunc ("gtk_placer_new", gtk_placer_new);

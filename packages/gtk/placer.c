@@ -236,8 +236,7 @@ gtk_placer_child_type (GtkContainer     *container)
 static void
 gtk_placer_init (GtkPlacer *placer)
 {
-  GTK_WIDGET_SET_FLAGS (placer, GTK_NO_WINDOW);
- 
+  gtk_widget_set_has_window(GTK_WIDGET(placer), FALSE);
   placer->children = NULL;
 }
 
@@ -329,7 +328,7 @@ gtk_placer_move_internal (GtkPlacer      *placer,
   
   g_return_if_fail (GTK_IS_PLACER (placer));
   g_return_if_fail (GTK_IS_WIDGET (widget));
-  g_return_if_fail (widget->parent == GTK_WIDGET (placer));  
+  g_return_if_fail (gtk_widget_get_parent(GTK_WIDGET(widget)) == GTK_WIDGET (placer));
   g_return_if_fail (!change_rel_x || (rel_x & ~32767) == 0);
   g_return_if_fail (!change_rel_y || (rel_y & ~32767) == 0);
   g_return_if_fail (!change_rel_width || (rel_width & ~32767) == 0);
@@ -391,7 +390,7 @@ gtk_placer_move_internal (GtkPlacer      *placer,
 
   gtk_widget_thaw_child_notify (widget);
   
-  if (GTK_WIDGET_VISIBLE (widget) && GTK_WIDGET_VISIBLE (placer))
+  if (gtk_widget_get_visible (GTK_WIDGET(widget)) && gtk_widget_get_visible (GTK_WIDGET(placer)))
     gtk_widget_queue_resize (GTK_WIDGET (placer));
 }
 
@@ -530,34 +529,39 @@ gtk_placer_get_child_property (GtkContainer *container,
 static void
 gtk_placer_realize (GtkWidget *widget)
 {
+  GdkWindow *window;
   GdkWindowAttr attributes;
+  GtkAllocation allocation;
   gint attributes_mask;
 
-  if (GTK_WIDGET_NO_WINDOW (widget))
+  if (!gtk_widget_get_has_window (widget))
     GTK_WIDGET_CLASS (parent_class)->realize (widget);
   else
     {
-      GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
+      gtk_widget_set_realized(widget, TRUE);
+      gtk_widget_get_allocation(widget, &allocation);
 
       attributes.window_type = GDK_WINDOW_CHILD;
-      attributes.x = widget->allocation.x;
-      attributes.y = widget->allocation.y;
-      attributes.width = widget->allocation.width;
-      attributes.height = widget->allocation.height;
+      attributes.x = allocation.x;
+      attributes.y = allocation.y;
+      attributes.width = allocation.width;
+      attributes.height = allocation.height;
       attributes.wclass = GDK_INPUT_OUTPUT;
       attributes.visual = gtk_widget_get_visual (widget);
+
       attributes.colormap = gtk_widget_get_colormap (widget);
       attributes.event_mask = gtk_widget_get_events (widget);
       attributes.event_mask |= GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK;
       
       attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
       
-      widget->window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, 
-				       attributes_mask);
-      gdk_window_set_user_data (widget->window, widget);
-      
-      widget->style = gtk_style_attach (widget->style, widget->window);
-      gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
+            window = gdk_window_new (gtk_widget_get_parent_window (widget),
+                               &attributes,
+                               attributes_mask);
+      gtk_widget_set_window(widget, window);
+      gdk_window_set_user_data (window, widget);
+      gtk_widget_style_attach (widget);
+      gtk_style_set_background (gtk_widget_get_style(widget), window, GTK_STATE_NORMAL);
     }
 }
 
@@ -573,7 +577,7 @@ gtk_placer_size_request (GtkWidget      *widget,
   gint height, width;
 
   placer = GTK_PLACER (widget);
-  border_width = GTK_CONTAINER (placer)->border_width;
+  border_width = gtk_container_get_border_width(GTK_CONTAINER (placer));
   requisition->width = 0;
   requisition->height = 0;
 
@@ -583,7 +587,7 @@ gtk_placer_size_request (GtkWidget      *widget,
       child = children->data;
       children = children->next;
 
-      if (GTK_WIDGET_VISIBLE (child->widget))
+      if (gtk_widget_get_visible (child->widget))
 	{
           gtk_widget_size_request (child->widget, &child_requisition);
 
@@ -638,19 +642,19 @@ gtk_placer_size_allocate (GtkWidget     *widget,
 
   placer = GTK_PLACER (widget);
 
-  widget->allocation = *allocation;
+  gtk_widget_set_allocation(widget, allocation);
 
-  if (!GTK_WIDGET_NO_WINDOW (widget))
+  if (gtk_widget_get_has_window (widget))
     {
-      if (GTK_WIDGET_REALIZED (widget))
-	gdk_window_move_resize (widget->window,
+      if (gtk_widget_get_realized (widget))
+  gdk_window_move_resize (gtk_widget_get_window(widget),
 				allocation->x, 
 				allocation->y,
 				allocation->width, 
 				allocation->height);
     }
       
-  border_width = GTK_CONTAINER (placer)->border_width;
+  border_width = gtk_container_get_border_width(GTK_CONTAINER (placer));
   rel_width_scale = (allocation->width - 2 * border_width) / 32767.0;
   rel_height_scale = (allocation->height - 2 * border_width) / 32767.0;
   
@@ -660,7 +664,7 @@ gtk_placer_size_allocate (GtkWidget     *widget,
       child = children->data;
       children = children->next;
       
-      if (GTK_WIDGET_VISIBLE (child->widget))
+      if (gtk_widget_get_visible (child->widget))
 	{
 	  gtk_widget_get_child_requisition (child->widget, &child_requisition);
 	  child_allocation.x = child->x + border_width
@@ -668,7 +672,7 @@ gtk_placer_size_allocate (GtkWidget     *widget,
 	  child_allocation.y = child->y + border_width
 			       + child->rel_y * rel_height_scale;
 
-	  if (GTK_WIDGET_NO_WINDOW (widget))
+    if (!gtk_widget_get_has_window (widget))
 	    {
 	      child_allocation.x += allocation->x;
 	      child_allocation.y += allocation->y;
@@ -718,7 +722,7 @@ gtk_placer_remove (GtkContainer *container,
 
       if (child->widget == widget)
 	{
-	  gboolean was_visible = GTK_WIDGET_VISIBLE (widget);
+    gboolean was_visible = gtk_widget_get_visible (widget);
 	  
 	  gtk_widget_unparent (widget);
 
@@ -726,7 +730,7 @@ gtk_placer_remove (GtkContainer *container,
 	  g_list_free (children);
 	  g_free (child);
 
-	  if (was_visible && GTK_WIDGET_VISIBLE (container))
+    if (was_visible && gtk_widget_get_visible (GTK_WIDGET (container)))
 	    gtk_widget_queue_resize (GTK_WIDGET (container));
 
 	  break;
@@ -775,16 +779,7 @@ void
 gtk_placer_set_has_window (GtkPlacer *placer,
 			   gboolean  has_window)
 {
-  g_return_if_fail (GTK_IS_PLACER (placer));
-  g_return_if_fail (!GTK_WIDGET_REALIZED (placer));
-
-  if (!has_window != GTK_WIDGET_NO_WINDOW (placer))
-    {
-      if (has_window)
-	GTK_WIDGET_UNSET_FLAGS (placer, GTK_NO_WINDOW);
-      else
-	GTK_WIDGET_SET_FLAGS (placer, GTK_NO_WINDOW);
-    }
+  gtk_widget_set_has_window (GTK_WIDGET(placer), has_window);
 }
 
 /**
@@ -799,7 +794,5 @@ gtk_placer_set_has_window (GtkPlacer *placer,
 gboolean
 gtk_placer_get_has_window (GtkPlacer *placer)
 {
-  g_return_val_if_fail (GTK_IS_PLACER (placer), FALSE);
-
-  return !GTK_WIDGET_NO_WINDOW (placer);
+  return gtk_widget_get_has_window (GTK_WIDGET(placer));
 }

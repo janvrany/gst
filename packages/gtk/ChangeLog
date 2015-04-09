@@ -1,3 +1,17 @@
+2015-04-15  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	Updated to GTK 2.20+
+
+	* gst-gtk.c: Removed a number of accessors as newer GTK
+	  have them 
+	* placer.c: Replaced direct access to GTK widget properties 
+	  by accessor functions when possible. Avoid usage of
+	  GTK_WIDGET_SET_FLAGS()/GTK_WIDGET_GET_FLAGS(), replace
+	  by calling corresponding API functions. 
+	* MoreFuncs.st: Removed call-outs to gst-specific accessors
+	  that used to be defined in gst-gtk.c as they are no longer
+	  needed. 
+
 2013-08-24  Holger Hans Peter Freyther  <holger@freyther.de>
 
 	* mk_enums.awk: Use #ifdef/#endif around key definition.

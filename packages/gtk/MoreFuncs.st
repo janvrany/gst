@@ -88,14 +88,11 @@ GtkWidget extend [
 
     getAllocation [
 	<category: 'C call-outs'>
-	<cCall: 'gstGtkWidgetGetAllocation' returning: #{GtkAllocation}
-	args: #(#self )>
+	| allocation |
 	
-    ]
-
-    getWindow [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkGetWindow' returning: #{GdkWindow} args: #(#self )>
+	allocation := GtkAllocation new.
+	self getAllocation: allocation.
+	^ allocation
 	
     ]
 
@@ -189,16 +186,7 @@ GtkListStore extend [
 GtkDialog extend [
 
     getVBox [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkDialogGetVBox' returning: #{GtkWidget} args: #(#self )>
-	
-    ]
-
-    getActionArea [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkDialogGetActionArea' returning: #{GtkWidget}
-	args: #(#self )>
-	
+	^self getContentArea
     ]
 
 ]
