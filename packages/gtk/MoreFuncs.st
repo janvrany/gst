@@ -27,55 +27,7 @@ GtkAccelGroup extend [
     ]
 ]
 
-
-"These have a weird name in C."
-
-GtkObject extend [
-    signalEmit: signal args: argsArray [
-	<category: 'C call-outs'>
-	<cCall: 'gtk_signal_emit' returning: #void
-	args: #(#self #int #variadic)>
-	
-    ]
-
-    signalEmitByName: signal args: argsArray [
-	<category: 'C call-outs'>
-	<cCall: 'gtk_signal_emit_by_name' returning: #void
-	args: #(#self #string #variadic)>
-	
-    ]
-
-    signalNEmissions: signal [
-	<category: 'C call-outs'>
-	<cCall: 'gtk_signal_n_emissions' returning: #int
-	args: #(#self #int)>
-	
-    ]
-
-    signalNEmissionsByName: signal [
-	<category: 'C call-outs'>
-	<cCall: 'gtk_signal_n_emissions_by_name' returning: #int
-	args: #(#self #string)>
-	
-    ]
-
-    signalEmitStop: signal [
-	<category: 'C call-outs'>
-	<cCall: 'gtk_signal_emit_stop' returning: #void
-	args: #(#self #int)>
-	
-    ]
-
-    signalEmitStopByName: signal [
-	<category: 'C call-outs'>
-	<cCall: 'gtk_signal_emit_stop_by_name' returning: #void
-	args: #(#self #string)>
-	
-    ]
-
-]
-
-GTK.GdkDrawable extend [
+GTK.GdkWindow extend [
 
     cairoCreate [
         <category: 'C call-outs'>
@@ -196,15 +148,12 @@ GtkDialog extend [
 GtkScrolledWindow extend [
 
     getHscrollbarVisible [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkGetHscrollbarVisible' returning: #boolean args: #(#self )>
+	self getHscrollbar getVisible
 	
     ]
 
     getVscrollbarVisible [
-	<category: 'C call-outs'>
-	<cCall: 'gstGtkGetVscrollbarVisible' returning: #boolean args: #(#self )>
-	
+	self getHscrollbar getVisible
     ]
 
 ]

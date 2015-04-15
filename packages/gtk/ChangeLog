@@ -1,5 +1,22 @@
 2015-04-15  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
+	Updated to GTK 3.10
+
+	* gst-gtk.c: Removed (now) obsolete scrolled_window_get_hscrollbar_visible()
+	  and scrolled_window_get_vscrollbar_visible()
+	* placer.c: Updated to GTK 3.0 API
+	* structs.awk: Removed GtkObject and GdkDrawable,- they're gone in 
+	  GTK 3.0
+	* funcs.awk: Makde gdk_window_*() functions to belong to GdkWindow
+	  and not to GdkDrawable (which is gone)
+	* MoreFuncs.st: Removed extensions for GtkObject (it's gone) and
+	  callouts in GtkScrolledWindow (GTK 3.0 provides accessors)
+	* GtkImpl.st: Removed extensios to GdkRectangle which is an alias to 
+	  cairo_rectangle_int_t in GTK 3.0. Moved extensions of (now gone)
+	  GdkDrawable to GdkWindow
+
+2015-04-15  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
 	Updated to GTK 2.20+
 
 	* gst-gtk.c: Removed a number of accessors as newer GTK

@@ -36,16 +36,19 @@ BEGIN {
 
   # These are implemented strangely...
   classNames["GValue"] = ""
-  classNames["GdkAtom"] = ""
-  classNames["GtkObject"] = ""
+  classNames["GdkAtom"] = "" 
   classNames["GtkEditable"] = ""
 
   # GtkEditable is a dummy class, so we must set inheritance manually
   known_parent["GtkEntry"] = "GtkEditable"
   known_parent["GtkEditable"] = "GtkWidget"
-  known_parent["GtkObject"] = "GLib.GObject"
-  known_parent["GdkWindowObject"] = "GdkDrawable"
 
+  known_parent["GtkWidget"] = "GLib.GObject"
+  known_parent["GtkAdjustment"] = "GLib.GObject"
+  known_parent["GtkCellRenderer"] = "GLib.GObject"
+  known_parent["GtkCellArea"] = "GLib.GObject"
+  known_parent["GtkTreeViewColumn"] = "GLib.GObject"
+  
   # A couple of things that we need from GLib
   known_parent["GOptionGroup"] = "CObject"
   known_parent["GDate"] = "CObject"

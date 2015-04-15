@@ -70,6 +70,12 @@ static void gtk_placer_init          (GtkPlacer         *placer);
 static void gtk_placer_realize       (GtkWidget        *widget);
 static void gtk_placer_size_request  (GtkWidget        *widget,
 				      GtkRequisition   *requisition);
+static void gtk_placer_get_preferred_width (GtkWidget *widget,
+                               		    gint      *minimal_width,
+                               		    gint      *natural_width);
+static void gtk_placer_get_preferred_height (GtkWidget *widget,
+                                             gint      *minimal_height,
+                                             gint      *natural_height);
 static void gtk_placer_size_allocate (GtkWidget        *widget,
 				      GtkAllocation    *allocation);
 static void gtk_placer_add           (GtkContainer     *container,
@@ -135,7 +141,8 @@ gtk_placer_class_init (GtkPlacerClass *class)
   parent_class = g_type_class_peek_parent (class);
 
   widget_class->realize = gtk_placer_realize;
-  widget_class->size_request = gtk_placer_size_request;
+  widget_class->get_preferred_width = gtk_placer_get_preferred_width;
+  widget_class->get_preferred_height = gtk_placer_get_preferred_height;
   widget_class->size_allocate = gtk_placer_size_allocate;
 
   container_class->add = gtk_placer_add;
@@ -549,13 +556,12 @@ gtk_placer_realize (GtkWidget *widget)
       attributes.wclass = GDK_INPUT_OUTPUT;
       attributes.visual = gtk_widget_get_visual (widget);
 
-      attributes.colormap = gtk_widget_get_colormap (widget);
       attributes.event_mask = gtk_widget_get_events (widget);
       attributes.event_mask |= GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK;
       
-      attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
+      attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL;
       
-            window = gdk_window_new (gtk_widget_get_parent_window (widget),
+      window = gdk_window_new (gtk_widget_get_parent_window (widget),
                                &attributes,
                                attributes_mask);
       gtk_widget_set_window(widget, window);
@@ -626,6 +632,26 @@ gtk_placer_size_request (GtkWidget      *widget,
 
   requisition->height += border_width * 2;
   requisition->width += border_width * 2;
+}
+
+static void
+gtk_placer_get_preferred_width (GtkWidget *widget,
+                               gint      *minimal_width,
+                               gint      *natural_width)
+{
+  GtkRequisition requisition;
+  gtk_placer_size_request (widget, &requisition);
+  *minimal_width = *natural_width = requisition.width;
+}
+
+static void
+gtk_placer_get_preferred_height (GtkWidget *widget,
+                                 gint      *minimal_height,
+                                 gint      *natural_height)
+{
+  GtkRequisition requisition;
+  gtk_pkacer_size_request (widget, &requisition);
+  *minimal_height = *natural_height = requisition.height;
 }
 
 static void

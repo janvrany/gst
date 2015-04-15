@@ -490,8 +490,8 @@ GST_PACKAGE_ENABLE([GTK], [gtk], [
   if test "$enable_gtk" != no && test "$gst_cv_glib" != no; then
     maybe_enable_gtk=$enable_gtk
     enable_gtk=no
-    AM_PATH_GTK_2_0(2.20.0,
-      [PKG_CHECK_MODULES(ATK, atk >= 1.0.0,
+    AM_PATH_GTK_3_0(3.10.0,
+      [PKG_CHECK_MODULES(ATK, atk >= 2.12.0,
         [PKG_CHECK_MODULES(PANGO, pango >= 1.0.0,
                            [enable_gtk=$maybe_enable_gtk], :)], [:])])
   fi],

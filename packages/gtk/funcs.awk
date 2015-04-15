@@ -117,9 +117,9 @@ BEGIN {
     # Not really exact, this belongs in GtkFileChooserWidget too.
     # We need a way to do interfaces.
     prefix_class["gtk_file_chooser_"] = "GtkFileChooserDialog"
-    prefix_class["gdk_window_"] = "GdkDrawable"
+    #prefix_class["gdk_window_"] = "GdkDrawable"
     self_class["gtk_file_chooser_"] = "GtkFileChooserDialog"
-    self_class["gdk_window_"] = "GdkWindow"
+    #self_class["gdk_window_"] = "GdkWindow"
 }
 
 # Pick the correct case for the class (e.g. CList vs. Clist)

@@ -231,18 +231,6 @@ widget_unset_flags (GtkWidget *widget, int flags)
   GTK_WIDGET_UNSET_FLAGS (widget, flags);
 }
 
-static int
-scrolled_window_get_hscrollbar_visible (GtkScrolledWindow *swnd)
-{
-  return (GTK_SCROLLED_WINDOW(swnd)->hscrollbar_visible);
-}
-
-static int
-scrolled_window_get_vscrollbar_visible (GtkScrolledWindow *swnd)
-{
-  return (GTK_SCROLLED_WINDOW(swnd)->vscrollbar_visible);
-}
-
 /* Initialization.  */
  
 static int initialized = 0;
@@ -272,8 +260,6 @@ gst_initModule (proxy)
   _gtk_vm_proxy->defineCFunc ("gstGtkGetFlags", widget_get_flags);
   _gtk_vm_proxy->defineCFunc ("gstGtkSetFlags", widget_set_flags);
   _gtk_vm_proxy->defineCFunc ("gstGtkUnsetFlags", widget_unset_flags);
-  _gtk_vm_proxy->defineCFunc ("gstGtkGetHscrollbarVisible", scrolled_window_get_hscrollbar_visible);
-  _gtk_vm_proxy->defineCFunc ("gstGtkGetVscrollbarVisible", scrolled_window_get_vscrollbar_visible);
   _gtk_vm_proxy->defineCFunc ("gstGtkTreeModelGetOOP", tree_model_get_oop);
   _gtk_vm_proxy->defineCFunc ("gstGtkListStoreSetOOP", list_store_set_oop);
   _gtk_vm_proxy->defineCFunc ("gstGtkTreeStoreSetOOP", tree_store_set_oop);

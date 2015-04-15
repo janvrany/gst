@@ -16,7 +16,7 @@ GtkAlignment class extend [
 ]
 
 
-GdkDrawable extend [
+GdkWindow extend [
 
     withContextDo: aBlock [
 	"Execute aBlock passing a valid Cairo context for the
@@ -127,102 +127,6 @@ GtkRequisition extend [
     ]
 
 ]
-
-
-
-GdkRectangle class extend [
-
-    fromRectangle: rect [
-	<category: 'instance creation'>
-	| ba |
-	ba := (CShortType arrayType: 4) new.
-	ba at: 0 put: rect left.
-	ba at: 1 put: rect top.
-	ba at: 2 put: rect width.
-	ba at: 3 put: rect height.
-	^(ba castTo: self type)
-	    addToBeFinalized;
-	    yourself
-    ]
-
-]
-
-
-
-GdkRectangle extend [
-
-    left [
-	<category: 'accessing'>
-	| ba |
-	ba := self castTo: (CShortType arrayType: 4).
-	^ba at: 0
-    ]
-
-    top [
-	<category: 'accessing'>
-	| ba |
-	ba := self castTo: (CShortType arrayType: 4).
-	^ba at: 1
-    ]
-
-    right [
-	<category: 'accessing'>
-	| ba |
-	ba := self castTo: (CShortType arrayType: 4).
-	^(ba at: 0) + (ba at: 2)
-    ]
-
-    bottom [
-	<category: 'accessing'>
-	| ba |
-	ba := self castTo: (CShortType arrayType: 4).
-	^(ba at: 1) + (ba at: 3)
-    ]
-
-    width [
-	<category: 'accessing'>
-	| ba |
-	ba := self castTo: (CShortType arrayType: 4).
-	^ba at: 2
-    ]
-
-    height [
-	<category: 'accessing'>
-	| ba |
-	ba := self castTo: (CShortType arrayType: 4).
-	^ba at: 3
-    ]
-
-    origin [
-	<category: 'accessing'>
-	| ba |
-	ba := self castTo: (CShortType arrayType: 4).
-	^(ba at: 0) @ (ba at: 1)
-    ]
-
-    extent [
-	<category: 'accessing'>
-	| ba |
-	ba := self castTo: (CShortType arrayType: 4).
-	^(ba at: 2) @ (ba at: 3)
-    ]
-
-    corner [
-	<category: 'accessing'>
-	| ba |
-	ba := self castTo: (CShortType arrayType: 4).
-	^((ba at: 0) + (ba at: 2)) @ ((ba at: 1) + (ba at: 3))
-    ]
-
-    asRectangle [
-	<category: 'conversion'>
-	| ba |
-	ba := self castTo: (CShortType arrayType: 4).
-	^(ba at: 0) @ (ba at: 1) extent: (ba at: 2) @ (ba at: 3)
-    ]
-
-]
-
 
 
 GtkTreeIter class extend [
